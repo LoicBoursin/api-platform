@@ -134,3 +134,15 @@ COPY --from=dunglas/mercure:v0.11 /srv/public /srv/mercure-assets/
 COPY --from=api_platform_caddy_builder /usr/bin/caddy /usr/bin/caddy
 COPY --from=api_platform_php /srv/api/public public/
 COPY docker/caddy/Caddyfile /etc/caddy/Caddyfile
+
+FROM zackkitzmiller/varnish-arm:alpine AS varnish
+
+RUN apk add git varnish-dev  py-docutils  make autoconf automake libtool make pkgconf python3 gcc libc-dev libgcc py3-sphinx
+RUN git clone --branch 6.2 --single-branch https://github.com/varnish/varnish-modules.git /varnish-modules && \
+	cd /varnish-modules && \
+	./bootstrap && \
+  ./configure && \
+	make && \
+	make install
+
+COPY docker/varnish/conf/default.vcl /etc/varnish/
